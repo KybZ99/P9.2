@@ -1,0 +1,49 @@
+version: '3.2'
+
+services:
+#serwer Nginx ma wyświetlać stronę startową php (index.php). Nginx jest przyłączony do backend oraz
+#frontend. Nginx ma wystawiony na świat zewnętrzy port 6666,
+  nginx:
+    image: nginx:latest
+    networks:
+      - backend
+      - frontend
+    ports:
+      - "6666:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./www:/www
+# serwer PHP jest przyłączony do sieci backend
+  php:
+    image: php:fpm
+    networks:
+      - backend
+    volumes:
+      - ./www:/www
+# serwer MySQL jest przyłączony do sieci backend
+  mysql:
+    image: mariadb:latest
+    networks:
+      backend:
+        aliases:
+          - db
+    environment:
+      - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=true
+# serwer phpMyAdmin sjest przyłączony do sieci backend
+# serwer phpMyAdmin ma być dostępny na porcie 6001 i powinno być możliwe zalogowanie się do
+# niego i założenie testowej bazy
+  phpmyadmin:
+    image: phpmyadmin:latest
+    networks:
+      - backend
+      - frontend
+    ports:
+      - "6001:80"
+
+#Określenie własnych sieci
+networks:
+  frontend:
+  backend:
+
+volumes:
+  www:
